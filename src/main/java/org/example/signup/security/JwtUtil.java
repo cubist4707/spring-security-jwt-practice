@@ -62,4 +62,12 @@ public class JwtUtil {
     public String getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
     }
+
+    public Long getExpiration(String token) {
+        Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration();
+
+        Long now = new Date().getTime();
+
+        return (expiration.getTime() - now);
+    }
 }

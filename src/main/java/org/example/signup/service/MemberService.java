@@ -7,9 +7,13 @@ import org.example.signup.domain.MemberRepository;
 import org.example.signup.dto.LoginRequestDto;
 import org.example.signup.dto.SignupRequestDto;
 import org.example.signup.security.JwtUtil;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
@@ -55,5 +59,23 @@ public class MemberService {
         }
 
         return jwtUtil.createToken(member.getUsername());
+    }
+
+    public final RedisTemplate<String, String> redisTemplate;
+
+    public String logout(String bearerToken) {
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtUtil.BEARER_PREFIX)) {
+            String token = bearerToken.substring(7);
+
+            if (jwtUtil.validateToken(token)) {
+                Long expiration = jwtUtil.getExpiration(token);
+
+                redisTemplate.opsForValue()
+                        .set(token, "logout", expiration, TimeUnit.MILLISECONDS);
+
+                return "로그아웃 완료";
+            }
+        }
+        throw new IllegalArgumentException("유효하지 않은 토큰이거나 이미 로그아웃 완료됨");
     }
 }

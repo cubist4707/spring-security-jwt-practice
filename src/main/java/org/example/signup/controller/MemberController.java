@@ -1,5 +1,6 @@
 package org.example.signup.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.signup.dto.LoginRequestDto;
@@ -26,5 +27,11 @@ public class MemberController {
         res.addHeader("Authorization", token);
 
         return "로그인 성공!";
+    }
+
+    @PostMapping("/api/member/logout")
+    public String logout(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        return memberService.logout(bearerToken);
     }
 }
