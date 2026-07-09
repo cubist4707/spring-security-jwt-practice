@@ -26,6 +26,13 @@ public class MemberService {
 
     public void signup(SignupRequestDto requestDto) {
 
+        String email = requestDto.getEmail();
+
+        String isVerified = redisTemplate.opsForValue().get("verified_email:" + email);
+        if (isVerified == null || !isVerified.equals(true)) {
+            throw new IllegalArgumentException("이메일 인증을 먼저 진행해주세요.");
+        }
+
         String username = requestDto.getUsername();
         String password = requestDto.getPassword();
         String passwordConfirm = requestDto.getPasswordConfirm();
@@ -41,7 +48,10 @@ public class MemberService {
         Member member = Member.builder()
                 .username(username)
                 .password(passwordEncoder.encode(password))
+                .email(email)
                 .build();
+
+        redisTemplate.delete("verified_email:" + email);
 
         memberRepository.save(member);
     }

@@ -14,4 +14,7 @@ public class SignupRequestDto {
 
     @NotBlank()
     private String passwordConfirm;
+
+    @NotBlank()
+    private String email;
 }
